@@ -23,6 +23,9 @@ el archivo de texto con los selects."
 
 --c. Mostrar el nombre de las empresas que han participado en la organización de concursos con
 --montos mínimos de 40,000. Ordenar descendentemente por año y por monto.
+SELECT o.NomOrg FROM Organización o, Organizó oó
+WHERE  oó.IdOrg=o.IdOrg AND o.Tipo = 'emp'AND oó.Monto < 40000
+GROUP BY o.NomOrg
 
 
 --d. Obtener el nombre de todas las carreras que son licenciaturas, junto con el nombre de las
@@ -35,7 +38,13 @@ el archivo de texto con los selects."
 
 --f. Listar el nombre de las tesis que ganaron algún lugar en los concursos BANAMEX y AMIME
 --del año pasado (en ambos, no sólo en uno u otro).
-
+SELECT t.NomT FROM Tesis t, Ganó g, Concurso c, Organizó oó
+WHERE t.IdT=g.IdT AND g.IdCon=c.IdCon AND c.IdCon=oó.IdCon AND extract(year from c.FechaIni)=extract(year from sysdate)-1
+AND oó.IdOrg IN
+    (SELECT o.IdOrg FROM Organización o, Organizó oó
+    WHERE  oó.IdOrg=o.IdOrg AND (o.NomOrg='BANAMEX' AND o.NomOrg='AMIME')
+    GROUP BY  o.IdOrg) --Query para obtener Id de BANAMEX y AMIME
+    
 
 --g. Mostrar el nombre de los autores que participaron en algún concurso tanto el año pasado como
 --éste (en ambos, no sólo en uno u otro). Acompañarlos con el nombre de la(s) carrera(s) de la(s)
@@ -47,6 +56,11 @@ el archivo de texto con los selects."
 
 
 --i. Por empresa y por año, contar la cantidad de concursos que han organizado.
+SELECT o.NomOrg, EXTRACT(YEAR FROM c.FechaIni) AS Fecha, COUNT(*) 
+FROM Organización o, Organizó oó, Concurso c
+WHERE oó.IdOrg=o.IdOrg
+GROUP BY o.NomOrg, EXTRACT(YEAR FROM c.FechaIni)
+ORDER BY o.NomOrg
 
 
 --j. Escribir el nombre de las escuelas cuyos egresados han ganado algún lugar en más de dos
@@ -60,6 +74,18 @@ el archivo de texto con los selects."
 
 --l. Encontrar el nombre de los autores que ganaron el primer lugar en máximo un concurso durante
 --el año pasado. Acompañarlos con el nombre de la tesis con la cual ganaron.
+SELECT NomA, NomT, Lugar, EXTRACT(YEAR FROM FechaFin)
+FROM Autor a, Estudió e, Tesis t, Ganó g, Concurso c
+WHERE EXTRACT (YEAR FROM fechaini)=EXTRACT(YEAR FROM SYSDATE)-1
+      AND t.IdT IN (SELECT IdT
+                    FROM Ganó g, Concurso c
+                    WHERE Lugar=1 
+                          AND EXTRACT (YEAR FROM fechaini)=EXTRACT(YEAR FROM SYSDATE)-1
+                          AND g.IdCon=c.IdCon
+                    GROUP BY IdT
+                    HAVING COUNT(IdT)=1)
+      AND a.IdA=e.IdA AND e.IdT=t.IdT AND t.IdT=g.IdT AND g.IdCon=c.IdCon
+
 
 
 --m. Obtener el nombre de la(s) organización(es) que más concursos ha(n) organizado.
@@ -70,7 +96,14 @@ el archivo de texto con los selects."
 
 
 --o. Listar el nombre de las tesis, y el de sus autores, que han participado en más concursos.
-
+SELECT NomT, NomA, COUNT(*) AS Num_Concursos
+FROM Autor a, Estudió e, Tesis t, Ganó g, Concurso c
+WHERE a.IdA=e.IdA AND e.IdT=t.IdT AND t.IdT=g.IdT AND g.IdCon=c.IdCon
+GROUP BY NomT, NomA
+HAVING COUNT(*) = (SELECT MAX(COUNT(Lugar))
+                   FROM Ganó
+                   GROUP BY IdT)
+		   
 
 --p. Escribir el nombre de las organizaciones (escuelas o empresas) que han participado en la
 --organización de todos los concursos registrados.
