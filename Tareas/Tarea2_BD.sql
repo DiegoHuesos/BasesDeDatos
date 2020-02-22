@@ -1,7 +1,7 @@
 -- TAREA 2 DE BASES DE DATOS --
 -- Profesor: Felipe López
 -- Alumnos: 
-	--	José Luis ()
+	--	José Luis Gutiérrez (179888)
 	--	Rodrigo González()
 	--	Diego Hernández Delgado (176262)
 
@@ -19,7 +19,11 @@ el archivo de texto con los selects."
 
 --b. Listar el título de las tesis que participaron en concursos del año pasado. Ordenar
 --descendentemente por nombre del concurso y ascendentemente por nombre de la tesis.
-
+select nomt,nomcon from tesis inner join Estudió on tesis.idt=Estudió.idt
+inner join Organizó on Organizó.idorg=Estudió.idorg
+inner join Concurso on Concurso.idcon=Organizó.idcon
+where extract(year from fechatit) = extract(year from sysdate)
+order by nomcon desc, nomt
 
 --c. Mostrar el nombre de las empresas que han participado en la organización de concursos con
 --montos mínimos de 40,000. Ordenar descendentemente por año y por monto.
@@ -34,7 +38,10 @@ ORDER BY EXTRACT(YEAR FROM c.FechaFin) DESC, oó.Monto DESC
 
 --e. Escribir el nombre de los concursos, y el año, en los cuales no participaron egresados del ITAM.
 --Ordenar ascendentemente por año.
-
+select nomcon,fechaini,idA,Estudió.idorg from tesis inner join Estudió on tesis.idt=Estudió.idt
+inner join Organizó on Organizó.idorg=Estudió.idorg
+inner join Concurso on Concurso.idcon=Organizó.idcon
+where Estudió.idorg <> (select idorg from Organización where nomorg = 'ITAM')
 
 --f. Listar el nombre de las tesis que ganaron algún lugar en los concursos BANAMEX y AMIME
 --del año pasado (en ambos, no sólo en uno u otro).
@@ -53,7 +60,9 @@ AND oó.IdOrg IN
 
 --h. Obtener el nombre de los alumnos que egresaron de alguna carrera del área de ‘Administrativas’-
 --o que participaron en algún concurso celebrado este año.
-
+select noma from Autor inner join Estudió on Autor.idA=Estudió.ida
+inner join Carrera on Carrera.idCar=Estudió.idCar
+where (área='Administrativas') or (extract(year from fechatit) = extract(year from sysdate))
 
 --i. Por empresa y por año, contar la cantidad de concursos que han organizado.
 SELECT o.NomOrg, EXTRACT(YEAR FROM c.FechaIni) AS Fecha, COUNT(*) 
