@@ -23,9 +23,9 @@ el archivo de texto con los selects."
 
 --c. Mostrar el nombre de las empresas que han participado en la organización de concursos con
 --montos mínimos de 40,000. Ordenar descendentemente por año y por monto.
-SELECT o.NomOrg FROM Organización o, Organizó oó
-WHERE  oó.IdOrg=o.IdOrg AND o.Tipo = 'emp'AND oó.Monto < 40000
-GROUP BY o.NomOrg
+SELECT o.NomOrg, EXTRACT(YEAR FROM c.FechaFin), oó.Monto FROM Organización o, Organizó oó, Concurso c
+WHERE  oó.IdOrg=o.IdOrg AND o.Tipo = 'emp'AND oó.Monto >= 40000
+ORDER BY EXTRACT(YEAR FROM c.FechaFin) DESC, oó.Monto DESC
 
 
 --d. Obtener el nombre de todas las carreras que son licenciaturas, junto con el nombre de las
