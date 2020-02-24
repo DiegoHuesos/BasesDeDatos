@@ -89,6 +89,12 @@ ORDER BY o.NomOrg
 --j. Escribir el nombre de las escuelas cuyos egresados han ganado algún lugar en más de dos
 --concursos distintos.
 
+select nomorg,count(distinct idcon) Cant_concursos_distintos
+	from organización org, estudió e, ganó g
+	where org.idorg=e.idorg and e.idt=g.idt
+	group by nomorg
+	having count(distinct idcon)>2
+
 
 --k. Listar el nombre de los concursos cuyo monto total de organización fue de al menos 100,000.
 --Acompañarlos con el nombre de las organizaciones participantes, ordenando ascendentemente
@@ -118,7 +124,13 @@ WHERE EXTRACT (YEAR FROM fechaini)=EXTRACT(YEAR FROM SYSDATE)-1
 
 
 --m. Obtener el nombre de la(s) organización(es) que más concursos ha(n) organizado.
-
+select nomOrg, count(*) Cant_concursos
+from organización, organizó, concurso 
+where organización.idOrg = organizó.idOrg and organizó.idCon = concurso.idCon
+group by nomOrg having count(*) >= all
+		(select count(*)
+		from organizó
+		group by idorg)
 
 --n. Mostrar el nombre de las carreras cuyos egresados tienen menos participaciones en los
 --concursos. Mostrar también el nombre de las universidades en que se imparten.
@@ -153,4 +165,9 @@ HAVING COUNT(*) = (SELECT MAX(COUNT(Lugar))
 --p. Escribir el nombre de las organizaciones (escuelas o empresas) que han participado en la
 --organización de todos los concursos registrados.
 
-
+select nomOrg, count(*) cant_concursos
+from organización, organizó, concurso 
+where organización.idOrg = organizó.idOrg and organizó.idCon = concurso.idCon
+group by nomOrg having count(*)>=all
+  (select count(idCon) 
+  from concurso)
