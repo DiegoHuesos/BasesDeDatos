@@ -102,7 +102,23 @@ WHERE EXTRACT (YEAR FROM fechaini)=EXTRACT(YEAR FROM SYSDATE)-1
 
 --n. Mostrar el nombre de las carreras cuyos egresados tienen menos participaciones en los
 --concursos. Mostrar también el nombre de las universidades en que se imparten.
-
+select x.nom,organización.nomorg from
+	(select nomcar as nom,min(count(*)) as cont 
+	from carrera inner join imparte on carrera.idcar=imparte.idcar
+	inner join Organización on Organización.idorg=imparte.idorg
+	inner join Estudió on  Estudió.idorg=Organización.idorg
+	inner join Ganó on Ganó.idt=Estudió.idT
+	group by nomcar
+	order by nomcar) x
+inner join carrera on x.nom=carrera.nomcar
+inner join imparte on carrera.idcar=imparte.idcar
+inner join Organización on organización.idorg=imparte.idorg
+where x.cont = (select min(count(*))
+		from carrera inner join imparte on carrera.idcar=imparte.idcar
+		inner join Organización on Organización.idorg=imparte.idorg
+		inner join Estudió on  Estudió.idorg=Organización.idorg
+		inner join Ganó on Ganó.idt=Estudió.idT
+		group by nomcar)
 
 --o. Listar el nombre de las tesis, y el de sus autores, que han participado en más concursos.
 SELECT NomT, NomA, COUNT(*) AS Num_Concursos
