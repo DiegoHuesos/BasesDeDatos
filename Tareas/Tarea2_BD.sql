@@ -2,7 +2,7 @@
 -- Profesor: Felipe López
 -- Alumnos: 
 	--	José Luis Gutiérrez (179888)
-	--	Rodrigo González()
+	--	Rodrigo González(183873)
 	--	Diego Hernández Delgado (176262)
 
 "Tarea no. 2: Utilizando la base de datos de Concursos-Tesis contesta las siguientes preguntas
