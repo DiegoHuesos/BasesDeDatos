@@ -22,6 +22,7 @@ el archivo de texto con los selects."
 select nomt,nomcon from tesis inner join Estudió on tesis.idt=Estudió.idt
 inner join Organizó on Organizó.idorg=Estudió.idorg
 inner join Concurso on Concurso.idcon=Organizó.idcon
+inner join ganó on tesis.idt=ganó.idt
 where extract(year from fechatit) = extract(year from sysdate)
 order by nomcon desc, nomt
 
@@ -38,9 +39,9 @@ ORDER BY EXTRACT(YEAR FROM c.FechaFin) DESC, oó.Monto DESC
 
 --e. Escribir el nombre de los concursos, y el año, en los cuales no participaron egresados del ITAM.
 --Ordenar ascendentemente por año.
-select nomcon,fechaini,idA,Estudió.idorg from tesis inner join Estudió on tesis.idt=Estudió.idt
-inner join Organizó on Organizó.idorg=Estudió.idorg
-inner join Concurso on Concurso.idcon=Organizó.idcon
+select distinct nomcon, extract(year from fechaini) from concurso
+inner join ganó on concurso.idcon=ganó.idcon
+inner join Estudió on Ganó.idt=Estudió.idt
 where Estudió.idorg <> (select idorg from Organización where nomorg = 'ITAM')
 
 --f. Listar el nombre de las tesis que ganaron algún lugar en los concursos BANAMEX y AMIME
@@ -60,9 +61,9 @@ AND oó.IdOrg IN
 
 --h. Obtener el nombre de los alumnos que egresaron de alguna carrera del área de ‘Administrativas’-
 --o que participaron en algún concurso celebrado este año.
-select noma from Autor inner join Estudió on Autor.idA=Estudió.ida
+select noma from Ganó,Autor inner join Estudió on Autor.idA=Estudió.ida
 inner join Carrera on Carrera.idCar=Estudió.idCar
-where (área='Administrativas') or (extract(year from fechatit) = extract(year from sysdate))
+where (área='Administrativas') or (extract(year from fechatit) = extract(year from sysdate) and Estudió.idt in Ganó.idt)
 
 --i. Por empresa y por año, contar la cantidad de concursos que han organizado.
 SELECT o.NomOrg, EXTRACT(YEAR FROM c.FechaIni) AS Fecha, COUNT(*) 
@@ -79,7 +80,13 @@ ORDER BY o.NomOrg
 --k. Listar el nombre de los concursos cuyo monto total de organización fue de al menos 100,000.
 --Acompañarlos con el nombre de las organizaciones participantes, ordenando ascendentemente
 --por nombre del concurso y descendentemente por el de la organización.
-
+select x.nomcon,Organización.nomorg from
+(select distinct nomcon,Estudió.idorg as org from Concurso inner join Organizó on Concurso.idcon=Organizó.idcon
+inner join Ganó on Ganó.idcon=Concurso.idcon
+inner join Estudió on Estudió.idT=Ganó.idT
+where monto >= 100000) x
+inner join Organización on Organización.idorg = x.org
+order by nomcon, Organización.nomorg desc
 
 --l. Encontrar el nombre de los autores que ganaron el primer lugar en máximo un concurso durante
 --el año pasado. Acompañarlos con el nombre de la tesis con la cual ganaron.
