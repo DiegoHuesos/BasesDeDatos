@@ -15,7 +15,11 @@ el archivo de texto con los selects."
 
 --a. Escribir el nombre de las universidades que tienen carreras en el área de ‘Ingeniería’, junto con
 --el nombre de dichas carreras y el de sus egresados.
-
+select nomorg,Noma,carrera.nomcar from Organización inner join Estudió on Organización.Idorg=Estudió.IdOrg
+inner join Tesis on Estudió.idT=Tesis.idT
+inner join Autor on Estudió.IdA=Autor.IdA
+inner join Carrera on Carrera.IdCar=Estudió.IdCar
+where NomCar like 'Ing%'
 
 --b. Listar el título de las tesis que participaron en concursos del año pasado. Ordenar
 --descendentemente por nombre del concurso y ascendentemente por nombre de la tesis.
@@ -35,7 +39,11 @@ ORDER BY EXTRACT(YEAR FROM c.FechaFin) DESC, oó.Monto DESC
 
 --d. Obtener el nombre de todas las carreras que son licenciaturas, junto con el nombre de las
 --universidades en que se imparten.
-
+select nomorg,carrera.nomcar from Organización inner join Estudió on Organización.Idorg=Estudió.IdOrg
+inner join Tesis on Estudió.idT=Tesis.idT
+inner join Autor on Estudió.IdA=Autor.IdA
+inner join Carrera on Carrera.IdCar=Estudió.IdCar
+where NomCar like 'Lic%'
 
 --e. Escribir el nombre de los concursos, y el año, en los cuales no participaron egresados del ITAM.
 --Ordenar ascendentemente por año.
@@ -57,6 +65,11 @@ AND oó.IdOrg IN
 --g. Mostrar el nombre de los autores que participaron en algún concurso tanto el año pasado como
 --éste (en ambos, no sólo en uno u otro). Acompañarlos con el nombre de la(s) carrera(s) de la(s)
 --que egresaron.
+
+select distinct Noma, carrera.nomcar from AUTOR inner join Estudió on AUTOR.IdA=Estudió.IdA  inner join Carrera on Estudió.IdCar=Carrera.IdCar inner join Tesis on Estudió.IdT=Tesis.IdT inner join Ganó on Tesis.IdT=Ganó.IdT inner join Concurso on Ganó.IdCon=Concurso.IdCon where Noma in
+(select Noma from AUTOR inner join Estudió on AUTOR.IdA=Estudió.IdA inner join Tesis on Estudió.IdT=Tesis.IdT inner join Ganó on Tesis.IdT=Ganó.IdT inner join Concurso on Ganó.IdCon=Concurso.IdCon where extract (year from FechaIni) = extract(year from sysdate)-1)
+and Noma in
+(select Noma from AUTOR inner join Estudió on AUTOR.IdA=Estudió.IdA inner join Tesis on Estudió.IdT=Tesis.IdT inner join Ganó on Tesis.IdT=Ganó.IdT inner join Concurso on Ganó.IdCon=Concurso.IdCon where extract (year from FechaIni) = extract(year from sysdate))
 
 
 --h. Obtener el nombre de los alumnos que egresaron de alguna carrera del área de ‘Administrativas’-
