@@ -35,6 +35,18 @@ function cantEg (Area char)
 --b. Elabora un procedimiento que entregue dos parámetros de salida, el primero con el nombre del
 --área que más egresados tiene y el segundo con el de la que menos tiene (si en algún caso hay
 --empate, regresa el área alfabéticamente menor). Utiliza la función anterior. No emplees cursores.
+create or replace procedure mayorMenorEg(mas out varchar, menos out varchar) is
+begin
+select Área into menos from
+  (select Área, count(*) as canti from Carrera inner join Estudió on Carrera.idCar=Estudió.idCar
+  inner join Tesis on Tesis.idT=Estudió.idT group by Área order by canti, Área)
+ Fetch first 1 rows only;
+  
+select Área into mas from
+  (select Área, count(*) as canti from Carrera inner join Estudió on Carrera.idCar=Estudió.idCar
+  inner join Tesis on Tesis.idT=Estudió.idT group by Área order by canti desc, Área)
+  Fetch first 2 rows only;
+end;
 
 --c. Elabora un procedimiento que reciba como entrada el nombre de una organización, el nombre
 --de un concurso y un monto, y agregue la tupla correspondiente en la tabla Organizó.
