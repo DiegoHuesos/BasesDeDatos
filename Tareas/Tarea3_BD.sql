@@ -21,6 +21,16 @@
 
 --a. Elabora una función que reciba el nombre de un área (Ingeniería, Sociales o Administrativas) y
 --entregue la cantidad de egresados de la misma que han participado en los concursos.
+create or replace 
+function cantEg (Area char)
+  return integer is auxCant integer;
+  begin
+    select count(*) into auxCant from Ganó inner join Estudió on Estudió.idT=Ganó.idT
+    inner join Carrera on Carrera.idCar=Estudió.idCar
+    where Carrera.Área = Area;
+    return auxCant;
+  end;
+ 
 
 --b. Elabora un procedimiento que entregue dos parámetros de salida, el primero con el nombre del
 --área que más egresados tiene y el segundo con el de la que menos tiene (si en algún caso hay
