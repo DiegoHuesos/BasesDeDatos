@@ -64,7 +64,7 @@ function cantEg (Area char)
 --h. El inciso 4.f.
 --Elabora un procedimiento que tome como parámetros el nombre de dos alumnos, que use
 --cursores y que regrese en un parámetro de salida:
--− 0: si no llevan exactamente las mismas materias
--− 1: si sí, y
--− 2: si ambos no llevan materia alguna.
+--0: si no llevan exactamente las mismas materias
+--1: si sí, y
+--2: si ambos no llevan materia alguna.
 --Usa la función creada en el inciso 4.a para
