@@ -50,6 +50,13 @@ end;
 
 --c. Elabora un procedimiento que reciba como entrada el nombre de una organización, el nombre
 --de un concurso y un monto, y agregue la tupla correspondiente en la tabla Organizó.
+create or replace procedure creaConc(org varchar, conc varchar, monto float) is
+idC integer; idO integer;
+begin
+  select idOrg into idO from Organización where NomOrg = org;
+  select idCon into idC from Concurso where NomCon = conc;
+  insert into Organizó values(idO,idC,monto);
+end;
 
 --d. Elabora una función que reciba dos valores enteros de entrada, representando años en que se han
 --efectuado concursos. La función deberá entregar como resultado una cadena ‘Sí’, en caso de que
