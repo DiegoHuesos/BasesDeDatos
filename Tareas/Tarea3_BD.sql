@@ -71,6 +71,16 @@ end;
 --f. Elabora un trigger que actualice todas las tablas que sean necesarias cuando se cambie la clave
 --de una organización. En este caso tendrás que definir otros triggers de actualización sobre las
 --tablas de Escuela e Imparte para poder hacer todas las actualizaciones que se requieran.
+create or replace trigger cambiaOrg
+after update on Organización
+for each row
+begin
+  update Estudió set idOrg = :new.idOrg where idOrg =:old.idOrg;
+  update Imparte set idOrg = :new.idOrg where idOrg =:old.idOrg;
+  update Organizó set idOrg = :new.idOrg where idOrg =:old.idOrg;
+  update Escuela set idOrg = :new.idOrg where idOrg =:old.idOrg;
+  update Empresa set idOrg = :new.idOrg where idOrg =:old.idOrg;
+end;
 
 --g. Elabora un trigger sobre la tabla Organizó de tal manera que cuando se inserte una tupla, se
 --muestren en pantalla el nombre de las organizaciones y la suma total que cada una ha aportado
