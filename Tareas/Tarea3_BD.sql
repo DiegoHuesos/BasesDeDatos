@@ -104,3 +104,60 @@ end;
 --1: si sí, y
 --2: si ambos no llevan materia alguna.
 --Usa la función creada en el inciso 4.a para
+--Usa la función creada en el inciso 4.a para contar las materias:
+create or replace function cantMatersAlum(nombre char) return integer is
+  cantMaters integer;
+begin
+  select count(*) into cantMaters
+  from Alum a, Inscrito i
+  where Nomal=nombre and a.CU=i.CU;
+  return cantMaters;
+end;
+
+create or replace procedure igualMaterias(alum1 varchar, alum2 varchar) is 
+  cantAlum1 integer; cantAlum2 integer; resp integer;
+  
+  declare cursor MateriasAlum1 is
+    select m.ClaveM as matsAlum1 from Inscrito i, Alum a, Grupo g, Mater m where a.NomAl=alum1
+    and a.CU = i.CU and i.ClaveG = g.ClaveG and g.ClaveM = m.ClaveM GROUP BY m.ClaveM ORDER BY m.ClaveM;
+
+  declare cursor MateriasAlum2 is
+    select m.ClaveM as matsAlum2 from Inscrito i, Alum a, Grupo g, Mater m where a.NomAl=alum2
+    and a.CU = i.CU and i.ClaveG = g.ClaveG and g.ClaveM = m.ClaveM GROUP BY m.ClaveM ORDER BY m.ClaveM;
+        
+  idMatAlum1 integer; idMatAlum2 integer;
+  tuplaAlum1 MateriasAlum1%rowtype; tuplaAlum2 MateriasAlum1%rowtype;
+  
+begin
+  cantAlum1 := cantMatersAlum(alum1);
+  cantAlum2 := cantMatersAlum(alum2);
+  
+  if cantAlum1 = cantAlum2 then
+    if cantAlum1 = 0 then
+      res := 2;
+    else
+      begin
+        open 
+        loop
+          fetch MateriasAlum1 into idMatAlum1;
+          fetch MateriasAlum2 into idMatAlum2;
+          exit when MateriasAlum1%notfound or idMatAlum1 <> idMatAlum2;
+        end loop;
+        close MateriasAlum1;
+        close MateriasAlum2;
+      end;
+      if MateriasAlum1%notfound then
+        resp := 1;
+      else
+        resp := 0;
+      end if;
+
+    end if;
+  end if;
+  dbms_output.put_line(resp);
+end;
+
+
+begin
+igualMaterias('Ana','José');
+end;
