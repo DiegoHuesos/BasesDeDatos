@@ -65,6 +65,44 @@ end;
 --el año dado en el segundo; en caso contrario, la función debe regresar la cadena ‘No’. Utiliza
 --cursores para que esta función sea más eficiente. Este problema es de inclusión de conjuntos.
 
+--Declaración:
+create or replace function incisoD(anio1 int, anio2 int) return varchar is
+  participaron varchar(5); orgID int; conID int;
+    cursor org is select IDORG FROM ORGANIZACIÓN;
+    cursor con is (select distinct IdOrg from Organizó o, Concurso c
+    where o.IDCON=c.IDCON
+    and (Extract( year from (c.FECHAINI))=anio1 or Extract(year from (c.FECHAFIN))=anio1))
+    intersect (select distinct IdOrg from Organizó o, Concurso c
+    where o.IDCON=c.IDCON
+    and (Extract( year from (c.FECHAINI))=anio2 or Extract(year from (c.FECHAFIN))=anio2));
+begin
+    orgID := 0;
+    conID := 0;
+    for orgTupla in org loop
+        orgID := orgID + 1;
+    end loop;
+    for conTupla in con loop
+        conID := conID + 1;
+    end loop;
+    if orgID <> conID then
+        participaron:='No';
+    else
+        participaron:='Sí';
+    end if;
+    return participaron;
+end;
+
+--Ejecución
+declare
+    anio1 int; anio2 int; resp varchar(5);
+begin
+    anio1:=2016;
+    anio2:=2017;
+    resp:=incisoD(anio1,anio2);
+    dbms_output.put_line(resp);
+end;
+
+
 --e. Elabora un trigger que actualice todas las tablas que sean necesarias cuando se cambie la clave
 --de una tesis.
 create or replace trigger trigerIdT
@@ -96,6 +134,36 @@ end;
 --Nota: en este caso debes usar after insert, y no usar for each row en la definición del trigger. Al
 --no usar esta cláusula, no se podrá emplear :old, ni :new, aunque no son necesarios para este
 --ejercicio.
+
+--Declaración:
+   create or replace trigger InsOrganiza  
+	after insert on Organizó
+    declare cursor Organiza is
+	select NomOrg, sum(monto)
+	from Organización org, Organizó o
+	where org.IdOrg=o.IdOrg group by nomOrg;
+	nombre varchar(30); monto real;
+	    begin
+    	open Organiza;
+	      loop
+    	fetch Organiza into nombre, monto;
+    	exit when Organiza%notfound;
+    	dbms_output.put_line('La organización: ' || nombre || ', Suma: ' || monto);
+	  end loop;
+	 close Organiza;
+	    end;
+
+--Ejecución:
+	set SERVEROUTPUT ON
+create or replace function cantMatersAlum(nombre char) return integer is
+  cantMaters integer;
+begin
+  select count(*) into cantMaters
+  from Alum a, Inscrito i
+  where Nomal=nombre and a.CU=i.CU;
+  return cantMaters;
+end;
+
 
 --h. El inciso 4.f.
 --Elabora un procedimiento que tome como parámetros el nombre de dos alumnos, que use
