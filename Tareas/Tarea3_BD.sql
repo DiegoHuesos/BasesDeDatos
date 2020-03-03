@@ -67,6 +67,13 @@ end;
 
 --e. Elabora un trigger que actualice todas las tablas que sean necesarias cuando se cambie la clave
 --de una tesis.
+create or replace trigger trigerIdT
+after update on Tesis
+for each row
+begin
+  update Estudió set IdT = :new.IdT where IdT = :old.IdT;
+  update Ganó set IdT = :new.IdT where IdT = :old.Idt;
+end;
 
 --f. Elabora un trigger que actualice todas las tablas que sean necesarias cuando se cambie la clave
 --de una organización. En este caso tendrás que definir otros triggers de actualización sobre las
