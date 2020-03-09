@@ -1,0 +1,118 @@
+--	Diego Hernández Delgado
+-- 	(176262) 
+--	1er Examen Parcial
+--	04/02/2020
+
+a) 	SELECT m.Nombre, p.FolioP, p.FechaPed, c.Cantidad  
+	FROM Medicamento m, Inventario i, Pedido p, Cantidad c
+	WHERE m.Nombre >='L' AND  EXTRACT(MONTH FROM SYSDATE)-1 = EXTRACT(MONTH FROM p.FechaPed)
+	AND m.IdM=i.IdM  AND  i.IdF=p.IdF  AND p.FolioP=c.FolioP; 
+
+b)	SELECT Nombre, Domicilio FROM
+	((SELECT * FROM Proveedor)			--Todos los proveedores --
+	MINUS						--menos a --
+	( SELECT *					--los que sí se les hicieron pedidos--
+	FROM Proveedor pr, Pedido p
+	WHERE pr.IdP=p.IdP  AND  EXTRACT(YEAR FROM p.FechaPed) = EXTRACT(YEAR FROM SYSDATE)-1
+	AND  EXTRACT(MONTH FROM p.FechaPed) = 12 ) )
+	ORDER BY Nombre DESC;
+
+b.prof) select Nombre, Domicilio
+	from Proveedor
+	where IdP not in 
+		(select IdP
+		from Pedido
+		where extract(year from FechaPed) = extract(year from sysdate)-1
+	  	and extract(month from FechaPed) = 12)
+	order by Nombre desc;
+ 
+
+c)	select Nombre
+	from proveedor pr, pedido p
+	where pr.idp=p.idp
+	group by Nombre
+	having sum(MontoTotal)>200000
+		intersect
+	select distinct Nombre
+	from proveedor pr, pedido p, contiene c, medicamento m
+	where pr.idp=p.idp and p.foliop=c.foliop and c.idm=m.idm and Controlado;
+
+
+d) 	SELECT f.Nombre, COUNT(*) CantPedidos
+	FROM Farmacia f, Compra cp, Contiene c
+	WHERE f.IdF=cp.IdF  AND  cp.FolioP=c.FolioP 
+	GROUP BY f.Nombre
+	HAVING COUNT(*) <=  ALL	(SELECT  COUNT(*)
+				FROM Farmacia f, Compra cp, Contiene c
+				WHERE f.IdF=cp.IdF  AND  cp.FolioP=c.FolioP
+				GROUP BY f.IdP)
+
+d.prof) select Nombre
+	from Farmacia f, Compra c
+	where f.IdF=c.IdF 
+	group by Nombre
+	having count(*) <= all
+		(select count(*) from Compra
+	  	group by IdF);
+
+
+e)	DECLARE OR REPLACE TRIGGER descontinuar 
+	AFTER UPDATE ON Medicamento m
+	FOR EACH ROW
+	BEGIN
+		if  :old.FechaDescont = NULL and :new.FechaDescont <> NULL then
+			DELETE FROM Inventario i WHERE i.IdM = i:old.IdM;
+		end if;
+		
+	END;	
+
+
+e.prof) create or replace trigger DescontinuarMed				-- 0.2
+	after update on Medicamento
+	for each row
+	begin
+		-- ¿Se está actualizando el atributo FechaDescont?
+  		if :new.FechaDescont is not null then					-- 0.4
+			-- Sí.
+    			delete from Inventario where IdM = :new.IdM;			-- 0.4
+  		end if;
+	end;
+
+
+
+f.prof)	create or replace procedure EntregaPedido (folio int, fecha date) is
+  	idFarm int; 			 					--0.2
+  	-- Cursor para recorrer la tabla Contiene.
+  		cursor cursorCont is
+    	 select * from Contiene where FolioP = folio;			--0.5
+
+	begin
+  	-- Actualiza la tabla Pedido con la fecha de entrega.
+  	update Pedido set FechaEnt = fecha					--0.4
+    	where FolioP = folio;
+
+  	-- Recupera la clave de la farmacia que hizo el pedido.
+  	select IdF into idFarm from Pedido where FolioP = folio;		--0.4
+
+	-- Recorre la tabla Contiene.
+  	for tuplaCont in cursorCont loop					--0.4
+     		update Inventario 
+  		set Existencias = Existencias + tuplaCont.Cantidad		--0.6
+  		where IdF = idFarm and IdM = tuplaCont.IdM;
+ 	end loop;
+
+	end;
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
